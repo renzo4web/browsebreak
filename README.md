@@ -35,6 +35,7 @@ The easiest way to deploy your Plasmo extension is to use the built-in [bpp](htt
 
 ## TODO
 
-- [ ] Save the URL of the pages that i want to alert me about scroll in the localstorage
-- [ ] add logic in the `content.ts` file to check if the current page is in the localstorage
-- [] add logic to `content.ts` to track scroll y position and send a message to the frontend and show and alert
+- [x] Save the URL of the pages that i want to alert me about scroll in the localstorage
+- [x] add logic in the `content.ts` file to check if the current page is in the localstorage
+- [x] add logic to `content.ts` to track scroll y position and send a message to the frontend and show and alert
+- [] show modal when past umbral

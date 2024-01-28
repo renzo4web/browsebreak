@@ -1,13 +1,13 @@
 .hw-top {
-    width: 100px;
-    height: 100px;
+    width: 100vw !important;
+    height: 100vh !important;
     background: red;
     color: white;
     font-family: "Fascinate";
 }
 
 #plasmo-shadow-container {
-    z-index: 10 !important;
+    z-index: 99999999 !important;
     position: fixed !important;
 }
 
