@@ -31,3 +31,10 @@ This should create a production bundle for your extension, ready to be zipped an
 ## Submit to the webstores
 
 The easiest way to deploy your Plasmo extension is to use the built-in [bpp](https://bpp.browser.market) GitHub action. Prior to using this action however, make sure to build your extension and upload the first version to the store to establish the basic credentials. Then, simply follow [this setup instruction](https://docs.plasmo.com/framework/workflows/submit) and you should be on your way for automated submission!
+
+
+## TODO
+
+- [ ] Save the URL of the pages that i want to alert me about scroll in the localstorage
+- [ ] add logic in the `content.ts` file to check if the current page is in the localstorage
+- [] add logic to `content.ts` to track scroll y position and send a message to the frontend and show and alert

@@ -1,21 +1,35 @@
 import { useState } from "react"
 
+import { useStorage } from "@plasmohq/storage/hook"
+
 function IndexPopup() {
-  const [data, setData] = useState("")
+  const [sites, setSites] = useStorage("sites")
+
+  const handleSubmit = async (e: any) => {
+    const url = e.target.url.value
+    alert(url)
+    if (url) {
+      await setSites([...(sites ?? []), { url }])
+      alert("Saved")
+    }
+    // save url to chrome.storage
+    e.preventDefault()
+  }
 
   return (
     <div
       style={{
         padding: 16
       }}>
-      <h2>
-        Welcome to your{" "}
-        <a href="https://www.plasmo.com" target="_blank">
-          Plasmo
-        </a>{" "}
-        Extension!
-      </h2>
-      <input onChange={(e) => setData(e.target.value)} value={data} />
+      <div>
+        {sites?.map((site: any) => {
+          return <div key={site.url}>{site?.url}</div>
+        })}
+      </div>
+      <form onSubmit={handleSubmit}>
+        <input name="url" type="url" />
+        <button type="submit">Save</button>
+      </form>
       <a href="https://docs.plasmo.com" target="_blank">
         View Docs
       </a>
