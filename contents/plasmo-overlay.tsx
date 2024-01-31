@@ -1,11 +1,9 @@
-import cssText from "data-text:~/contents/plasmo-overlay.css"
 import type {
   PlasmoCSConfig,
   PlasmoGetStyle,
   PlasmoMountShadowHost
 } from "plasmo"
-import { useEffect, useRef, useState } from "react"
-import { unmountComponentAtNode } from "react-dom"
+import { useEffect, useState } from "react"
 import { useMount, useWindowScroll } from "react-use"
 
 import { Storage } from "@plasmohq/storage"
@@ -14,9 +12,11 @@ import { useStorage } from "@plasmohq/storage/dist/hook"
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
   style.textContent = `
+  @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;700&display=swap');
   .modal-window {
+  font-family: 'Merriweather', serif;
   position: fixed;
-  background-color: rgba(255, 255, 255, 0.25);
+  background-color: rgba(0, 100, 230, 0.96);
   top: 0;
   right: 0;
   bottom: 0;
@@ -70,6 +70,39 @@ export const getStyle: PlasmoGetStyle = () => {
   opacity: 1;
   pointer-events: auto;
 }
+
+/* Buttons styles start */
+button {
+    display: inline-block;
+    border: none;
+    padding: 1rem 2rem;
+    margin: 0;
+    text-decoration: none;
+    background: #0069ed;
+    color: #ffffff;
+    font-family: sans-serif;
+    font-size: 1rem;
+    line-height: 1;
+    cursor: pointer;
+    text-align: center;
+    transition: background 250ms ease-in-out, transform 150ms ease;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+}
+
+button:hover,
+button:focus {
+    background: #0053ba;
+}
+
+button:focus {
+    outline: 1px solid #fff;
+    outline-offset: -4px;
+}
+
+button:active {
+    transform: scale(0.99);
+}
   `
   return style
 }
@@ -103,8 +136,8 @@ const PlasmoOverlay = () => {
   const [lastScroll, setLastScroll] = useState(0)
   const { y } = useWindowScroll()
   const [showOverlay, setShowOverlay] = useState(false)
-  let scrollTotal = 0
   const umbralScroll = 50
+  const minLastScrollToWatch = 10
 
   const [scrollPercentage, setScrollPercentage] = useState(0)
 
@@ -130,6 +163,7 @@ const PlasmoOverlay = () => {
   useMount(() => {
     // check current y
     setLastScroll(y)
+    setAlerted(false)
   })
 
   useEffect(() => {
@@ -140,41 +174,45 @@ const PlasmoOverlay = () => {
 
       if (!currentSite) return
 
-      if (y <= 0) {
+      if (y <= minLastScrollToWatch) {
         setLastScroll(y)
         setShowOverlay(false)
         setAlerted(false)
       }
 
-      console.log("scroll", scrollPercentage)
-      console.log("currentSite", currentSite)
-      console.log("dd", umbralScroll)
-      if (
+      const canShowUmbral =
         !!currentSite &&
         scrollPercentage >= umbralScroll &&
         !showOverlay &&
-        lastScroll <= 0
-      ) {
-        alert("scrolling to much take a break;")
+        lastScroll <= minLastScrollToWatch &&
+        !alerted
+
+      if (canShowUmbral) {
         setShowOverlay(true)
+        setAlerted(true)
       }
     })()
   }, [sites, y, scrollPercentage])
 
-  console.log("showOverlay", showOverlay)
   return (
     <div id="open-modal" className={showOverlay ? `modal-window active` : ""}>
       {showOverlay && (
-        <div className="modal-content">
+        <div
+          style={{
+            borderRadius: "1em",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center"
+          }}
+          className="modal-content">
+          <h4>Take a break!</h4>
           <button
             onClick={() => {
-              setShowOverlay(false)
               setAlerted(true)
-            }}
-            className="modal-close">
+              setShowOverlay(false)
+            }}>
             Close
           </button>
-          <h4>Take a break</h4>
         </div>
       )}
     </div>
