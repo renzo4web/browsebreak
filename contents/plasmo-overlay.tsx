@@ -28,7 +28,7 @@ export const getStyle: PlasmoGetStyle = () => {
   transition: all 0.3s;
    }
     p {
-      background-color: yellow;
+        font-size: 1.2em;
     }
 
 .modal-window > div {
@@ -78,6 +78,7 @@ button {
     padding: 1rem 2rem;
     margin: 0;
     text-decoration: none;
+    border-radius: 0.3rem;
     background: #0069ed;
     color: #ffffff;
     font-family: sans-serif;
@@ -204,9 +205,22 @@ const PlasmoOverlay = () => {
             flexDirection: "column",
             alignItems: "center"
           }}
-          className="modal-content">
-          <h4>Take a break!</h4>
+          className="modal-content bg-gray-2">
+          <div
+            style={{
+              textAlign: "center"
+            }}>
+            <h4
+              style={{
+                fontSize: "1.5em",
+                marginBottom: "0px"
+              }}>
+              Take a break!
+            </h4>
+            <p>Take a few minutes to stretch your legs and refocus.</p>
+          </div>
           <button
+            className={"btn btn-rounded btn-primary btn-md"}
             onClick={() => {
               setAlerted(true)
               setShowOverlay(false)
