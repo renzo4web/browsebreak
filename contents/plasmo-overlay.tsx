@@ -109,7 +109,7 @@ button:active {
 
 export const config: PlasmoCSConfig = {}
 
-const storage = new Storage()
+export const storage = new Storage()
 export const mountShadowHost: PlasmoMountShadowHost = async ({
   shadowHost,
   anchor,
@@ -172,7 +172,7 @@ const PlasmoOverlay = () => {
         (site: any) => site.url === window.location.href
       )
 
-      if (!currentSite) return
+      if (!currentSite || !currentSite?.active) return
 
       if (y <= minLastScrollToWatch) {
         setLastScroll(y)
