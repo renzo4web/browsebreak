@@ -9,6 +9,8 @@ import { useMount, useWindowScroll } from "react-use"
 import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/dist/hook"
 
+import type { Site } from "~types"
+
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
   style.textContent = `
@@ -131,6 +133,12 @@ export const mountShadowHost: PlasmoMountShadowHost = async ({
   return null
 }
 
+function getCurrentSite(sites: Site[]) {
+  return sites?.find(
+    (site: any) => site.url === window.location.href && site.active
+  )
+}
+
 const PlasmoOverlay = () => {
   const [sites, setSites] = useStorage("sites")
   const [alerted, setAlerted] = useState(false)
@@ -139,6 +147,7 @@ const PlasmoOverlay = () => {
   const [showOverlay, setShowOverlay] = useState(false)
   const umbralScroll = 50
   const minLastScrollToWatch = 10
+  const [timerId, setTimerId] = useState(null) // State to track the timer
 
   const [scrollPercentage, setScrollPercentage] = useState(0)
 
@@ -167,12 +176,18 @@ const PlasmoOverlay = () => {
     setAlerted(false)
   })
 
+  /**
+   * Scroll logic
+   */
   useEffect(() => {
     ;(async () => {
       const currentSite = sites?.find(
         (site: any) => site.url === window.location.href
       )
 
+      if (currentSite?.type !== "scroll") {
+        return
+      }
       if (!currentSite || !currentSite?.active) return
 
       if (y <= minLastScrollToWatch) {
@@ -194,6 +209,41 @@ const PlasmoOverlay = () => {
       }
     })()
   }, [sites, y, scrollPercentage])
+
+  /*
+   *  Timer logic
+   * */
+  useEffect(() => {
+    const site = getCurrentSite(sites)
+    if (site?.type === "timer") {
+      const timeoutId = setTimeout(
+        () => {
+          setShowOverlay(true)
+          setAlerted(true)
+        },
+        Number(site.timerValue) * 1000
+      )
+
+      setTimerId(timeoutId)
+      return () => {
+        clearTimeout(timeoutId)
+      }
+    }
+  }, [sites])
+
+  const restartTimer = () => {
+    // Clear the previous timer
+    const site = getCurrentSite(sites)
+    clearTimeout(timerId)
+
+    // Restart the timer
+    const newTimerId = setTimeout(() => {
+      // Logic to show the alert after a certain time
+      setShowOverlay(true)
+    }, site.timerValue * 1000) // Restart the timer to 10 seconds
+
+    setTimerId(newTimerId) // Update the timer ID
+  }
 
   return (
     <div id="open-modal" className={showOverlay ? `modal-window active` : ""}>
@@ -219,6 +269,17 @@ const PlasmoOverlay = () => {
             </h4>
             <p>Take a few minutes to stretch your legs and refocus.</p>
           </div>
+          {getCurrentSite(sites)?.type === "timer" && (
+            <button
+              className={"btn btn-rounded btn-primary btn-md"}
+              onClick={() => {
+                setShowOverlay(false)
+                setAlerted(false)
+                restartTimer()
+              }}>
+              Alert me in {getCurrentSite(sites)?.timerValue} seconds
+            </button>
+          )}
           <button
             className={"btn btn-rounded btn-primary btn-md"}
             onClick={() => {
