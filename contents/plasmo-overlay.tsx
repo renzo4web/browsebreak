@@ -3,23 +3,23 @@ import type {
   PlasmoGetStyle,
   PlasmoMountShadowHost
 } from "plasmo"
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import { useMount, useWindowScroll } from "react-use"
 
 import { Storage } from "@plasmohq/storage"
 import { useStorage } from "@plasmohq/storage/dist/hook"
 
-import type { Site } from "~types"
+import getRandomPhrase from "~config"
+import { getCurrentSite } from "~helpers"
 
 export const getStyle: PlasmoGetStyle = () => {
   const style = document.createElement("style")
   style.textContent = `
-  @import url('https://fonts.googleapis.com/css2?family=Merriweather:wght@300;700&display=swap');
   .modal-window {
-  font-family: 'Merriweather', serif;
   position: fixed;
   background-color: rgba(0, 100, 230, 0.96);
   top: 0;
+  font-family: Arial, sans-serif;
   right: 0;
   bottom: 0;
   left: 0;
@@ -84,6 +84,7 @@ button {
     background: #0069ed;
     color: #ffffff;
     font-family: sans-serif;
+    border: 2px dashed #ffff;
     font-size: 1rem;
     line-height: 1;
     cursor: pointer;
@@ -133,12 +134,6 @@ export const mountShadowHost: PlasmoMountShadowHost = async ({
   return null
 }
 
-function getCurrentSite(sites: Site[]) {
-  return sites?.find(
-    (site: any) => site.url === window.location.href && site.active
-  )
-}
-
 const PlasmoOverlay = () => {
   const [sites, setSites] = useStorage("sites")
   const [alerted, setAlerted] = useState(false)
@@ -148,6 +143,10 @@ const PlasmoOverlay = () => {
   const umbralScroll = 50
   const minLastScrollToWatch = 10
   const [timerId, setTimerId] = useState(null) // State to track the timer
+  const phrase = useRef({
+    title: getRandomPhrase().title,
+    subtitle: getRandomPhrase().subtitle
+  })
 
   const [scrollPercentage, setScrollPercentage] = useState(0)
 
@@ -231,6 +230,15 @@ const PlasmoOverlay = () => {
     }
   }, [sites])
 
+  /*
+   *  Block logic
+   * */
+  useEffect(() => {
+    if (getCurrentSite(sites)?.type === "blocked") {
+      setShowOverlay(true)
+    }
+  }, [sites])
+
   const restartTimer = () => {
     // Clear the previous timer
     const site = getCurrentSite(sites)
@@ -253,9 +261,14 @@ const PlasmoOverlay = () => {
             borderRadius: "1em",
             display: "flex",
             flexDirection: "column",
-            alignItems: "center"
+            alignItems: "center",
+            backgroundColor: "rgba(10, 103, 221)",
+            borderWidth: "3px",
+            color: "white",
+            borderColor: "white",
+            borderStyle: "dashed"
           }}
-          className="modal-content bg-gray-2">
+          className="modal-content">
           <div
             style={{
               textAlign: "center"
@@ -265,29 +278,38 @@ const PlasmoOverlay = () => {
                 fontSize: "1.5em",
                 marginBottom: "0px"
               }}>
-              Take a break!
+              {phrase.current.title}
             </h4>
-            <p>Take a few minutes to stretch your legs and refocus.</p>
+            <p>{phrase.current.subtitle}</p>
           </div>
-          {getCurrentSite(sites)?.type === "timer" && (
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center"
+            }}>
+            {getCurrentSite(sites)?.type === "timer" && (
+              <button
+                className={"btn btn-rounded btn-primary btn-md"}
+                style={{
+                  marginRight: "1em"
+                }}
+                onClick={() => {
+                  setShowOverlay(false)
+                  setAlerted(false)
+                  restartTimer()
+                }}>
+                Alert me in {getCurrentSite(sites)?.timerValue} seconds
+              </button>
+            )}
             <button
               className={"btn btn-rounded btn-primary btn-md"}
               onClick={() => {
+                setAlerted(true)
                 setShowOverlay(false)
-                setAlerted(false)
-                restartTimer()
               }}>
-              Alert me in {getCurrentSite(sites)?.timerValue} seconds
+              Close
             </button>
-          )}
-          <button
-            className={"btn btn-rounded btn-primary btn-md"}
-            onClick={() => {
-              setAlerted(true)
-              setShowOverlay(false)
-            }}>
-            Close
-          </button>
+          </div>
         </div>
       )}
     </div>
