@@ -2,7 +2,7 @@
   "name": "browsebreak",
   "displayName": "browsebreak",
   "version": "0.0.1",
-  "description": "to much scroll is bad",
+  "description": "browser extension for productivity in the browser, alert when you are spending too much time on a website",
   "author": "renzo@devpulse.xyz",
   "scripts": {
     "dev": "plasmo dev",
